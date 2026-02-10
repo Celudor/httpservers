@@ -2,10 +2,15 @@ import type { Request, Response, NextFunction } from "express";
 import { BadRequestError, NotFoundError } from "./errors.js";
 import { sendResponse } from "../lib/json.js";
 import { createChirp, getChirpById, getChirps } from "../lib/db/queries/chirps.js";
+import { getBearerToken } from "../lib/auth.js";
+import { validateJWT } from "../lib/token.js";
+import { config } from "../config.js";
 
 
 export async function handlerCreateChirp(req: Request, res: Response, next: NextFunction) {
-    const payload: {body: string; userId: string} = req.body;
+    const token = getBearerToken(req);
+    const userId = validateJWT(token, config.api.secret);
+    const payload: {body: string; } = req.body;
     const badWords = ["kerfuffle", "sharbert", "fornax"];
     try {
         if (payload.body.length > 140) {
@@ -20,7 +25,7 @@ export async function handlerCreateChirp(req: Request, res: Response, next: Next
                 outwords.push(word);
             }
         }
-        const chirp = await createChirp({body: outwords.join(" "), userId: payload.userId});
+        const chirp = await createChirp({body: outwords.join(" "), userId: userId});
         sendResponse(res, 201, chirp);
     } catch (err) {
         next(err);

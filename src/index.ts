@@ -2,9 +2,9 @@ import express from "express";
 import { handlerReadiness } from "./api/handlerReadiness.js";
 import { middlewareLogResponses, middlewareMetricsInc } from "./api/middleware.js";
 import { handlerMetrics, handlerReset} from "./api/metrics.js";
-import { handlerValidate } from "./api/handlerValidate.js";
 import { errorHandeler } from "./api/errors.js";
 import { handlerCreateUser } from "./api/users.js";
+import { handlerCreateChirp, handlerGetChirps, handlerGetChirpById } from "./api/chirps.js";
 import postgres from "postgres";
 import {migrate} from "drizzle-orm/postgres-js/migrator";
 import {drizzle} from "drizzle-orm/postgres-js";
@@ -26,8 +26,10 @@ app.get("/admin/metrics", handlerMetrics);
 app.post("/admin/reset", handlerReset);
 
 app.get("/api/healthz", handlerReadiness);
-app.post("/api/validate_chirp", handlerValidate);
 app.post("/api/users", handlerCreateUser);
+app.post("/api/chirps", handlerCreateChirp);
+app.get("/api/chirps", handlerGetChirps);
+app.get("/api/chirps/:chirpId", handlerGetChirpById);
 
 app.use(errorHandeler);
 app.listen(PORT, () => {

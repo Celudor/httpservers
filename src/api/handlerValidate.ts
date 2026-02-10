@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "./errors.js";
+import { sendResponse } from "../lib/json.js";
 
 
 export async function handlerValidate(req: Request, res: Response, next: NextFunction) {
     const body: {body: string} = req.body;
     const badWords = ["kerfuffle", "sharbert", "fornax"];
-    res.header("Content-Type", "application/json");
     try {
         if (body.body.length > 140) {
             throw new BadRequestError("Chirp is too long. Max length is 140");
@@ -19,10 +19,8 @@ export async function handlerValidate(req: Request, res: Response, next: NextFun
                 outwords.push(word);
             }
         }
-
-        res.status(200).send(JSON.stringify({cleanedBody: outwords.join(" ")}));
+        sendResponse(res, 200, {cleanedBody: outwords.join(" ")});
     } catch (err) {
-        //res.status(400).send(JSON.stringify({error: err instanceof Error? err.message: err}));
         next(err);
     }
 }

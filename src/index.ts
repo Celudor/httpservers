@@ -4,6 +4,7 @@ import { middlewareLogResponses, middlewareMetricsInc } from "./api/middleware.j
 import { handlerMetrics, handlerReset} from "./api/metrics.js";
 import { handlerValidate } from "./api/handlerValidate.js";
 import { errorHandeler } from "./api/errors.js";
+import { handlerCreateUser } from "./api/users.js";
 import postgres from "postgres";
 import {migrate} from "drizzle-orm/postgres-js/migrator";
 import {drizzle} from "drizzle-orm/postgres-js";
@@ -14,16 +15,19 @@ await migrate(drizzle(migrationClient), config.db.migrationConfig);
 
  
 const app = express();
-const PORT = 8080;
+const PORT = config.api.port;
 
 
 app.use("/app", middlewareMetricsInc,  express.static("./src/app"));
 app.use(middlewareLogResponses);
 app.use(express.json());
-app.get("/api/healthz", handlerReadiness);
-app.post("/api/validate_chirp", handlerValidate)
+
 app.get("/admin/metrics", handlerMetrics);
 app.post("/admin/reset", handlerReset);
+
+app.get("/api/healthz", handlerReadiness);
+app.post("/api/validate_chirp", handlerValidate);
+app.post("/api/users", handlerCreateUser);
 
 app.use(errorHandeler);
 app.listen(PORT, () => {

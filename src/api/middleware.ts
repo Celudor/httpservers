@@ -11,6 +11,6 @@ export async function middlewareLogResponses(req: Request, res: Response, next: 
 }
 
 export async function middlewareMetricsInc(req: Request, res: Response, next: NextFunction) {
-    config.fileserverHits = config.fileserverHits + 1;
+    config.api.fileserverHits = config.api.fileserverHits + 1;
     next();
 }

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express"; 
+import { sendErrorMessage } from "../lib/json.js";
 
 export class BadRequestError extends Error {
     constructor(message: string) {
@@ -24,22 +25,18 @@ export class NotFoundError extends Error {
     }
 }
 
-function formatErrorMessage(message: string) {
-    return JSON.stringify({error: message});
-}
-
 export function errorHandeler(err: Error, req: Request, res: Response, next: NextFunction) {
     res.header("Content-Type", "application/json");
     if (err instanceof BadRequestError) {
-        res.status(400).send(formatErrorMessage(err.message));
+        sendErrorMessage(res, 400, err.message);
     } else if (err instanceof UnauthorizedError) {
-        res.status(401).send(formatErrorMessage(err.message));
+        sendErrorMessage(res, 401, err.message);
     } else if (err instanceof ForbiddenError) {
-        res.status(403).send(formatErrorMessage(err.message));
+        sendErrorMessage(res, 403, err.message);
     } else if (err instanceof NotFoundError) {
-        res.status(404).send(formatErrorMessage(err.message));
+        sendErrorMessage(res, 404, err.message);
     } else {
         console.log(err);
-        res.status(500).send(JSON.stringify({error: "Something went wrong on our end"}));
+        sendErrorMessage(res, 500, "Something went wrong on our end");
     }
 }

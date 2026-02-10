@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import { BadRequestError, NotFoundError } from "./errors.js";
+import { BadRequestError, ForbiddenError, NotFoundError } from "./errors.js";
 import { sendResponse } from "../lib/json.js";
-import { createChirp, getChirpById, getChirps } from "../lib/db/queries/chirps.js";
+import { createChirp, deleteChirpById, getChirpById, getChirps } from "../lib/db/queries/chirps.js";
 import { getBearerToken } from "../lib/auth.js";
 import { validateJWT } from "../lib/token.js";
 import { config } from "../config.js";
@@ -33,10 +33,12 @@ export async function handlerCreateChirp(req: Request, res: Response, next: Next
 }
 
 
-export async function handlerGetChirps(_req: Request, res: Response, next: NextFunction) {
+export async function handlerGetChirps(req: Request, res: Response, next: NextFunction) {
     try {
-        const chirps = await getChirps();
-        sendResponse(res, 200, chirps);
+        const authorId = <string|undefined>req.query.authorId;
+        const sort = <"asc"|"desc"|undefined>req.query.sort;
+        const chirps = await getChirps(authorId);
+        sendResponse(res, 200, sort === "desc" ? chirps.reverse() : chirps);
     } catch (err) {
         next(err);
     }
@@ -54,4 +56,21 @@ export async function handlerGetChirpById(req: Request, res: Response, next: Nex
     } catch (err) {
         next(err);
     }
+}
+
+export async function handlerDeleteChirp(req: Request, res: Response, next: NextFunction) {
+    const token = getBearerToken(req);
+    const userId = validateJWT(token, config.api.secret);
+    const chirpId: string = <string>req.params.chirpId;
+    const chirp = await getChirpById(chirpId);
+    if (!chirp) {
+        throw new NotFoundError("Not found");
+    }
+    if (chirp.userId !== userId) {
+        throw new ForbiddenError("Forbidden");
+    }
+
+    await deleteChirpById(chirpId);
+    res.status(204).send();
+
 }

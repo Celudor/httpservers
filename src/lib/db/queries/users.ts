@@ -15,3 +15,18 @@ export async function getUserByEmail(email: string) {
 export async function deleteUsers() {
     await db.delete(users);
 }
+
+export async function updateUser(userId: string, email: string, hash: string) {
+    const [result] = await db.update(users).set({
+        email: email,
+        hashedPassword: hash
+    }).where(eq(users.id, userId)).returning();
+    return result;
+}
+
+export async function setIsChirpyRed(userId: string) {
+    const [result] = await db.update(users).set({
+        isChirpyRed: true
+    }).where(eq(users.id, userId)).returning();
+    return result;
+}

@@ -17,6 +17,7 @@ export type APIConfig = {
         port: number;
         fileserverHits: number;
         secret: string;
+        polkaKey: string;
     };
     db: DBConfig;
 };
@@ -35,6 +36,7 @@ export let config: APIConfig = {
         platform: envOrThrow("PLATFORM"),
         port: parseInt(envOrThrow("PORT")),
         secret: envOrThrow("SECRET"),
+        polkaKey: envOrThrow("POLKA_KEY"),
     },
     db: {
         url: envOrThrow("DB_URL"),

@@ -12,9 +12,19 @@ export function checkPasswordHash(password: string, hash: string): Promise<boole
 
 export function getBearerToken(req: Request): string {
     const token = req.get('Authorization');
-    if (!token) {
-        throw new UnauthorizedError("Authorization header is missing");
+    if (!token || !token.includes("Bearer")) {
+        throw new UnauthorizedError("Unauthorized");
     } 
     const tokenText = token.trim().split(/\s+/);
     return tokenText[tokenText.length-1];
+}
+
+export function getAPIKey(req: Request): string {
+    const token = req.get('Authorization');
+    if (!token || !token.includes("ApiKey")) {
+        throw new UnauthorizedError("Unauthorized");
+    } 
+    const tokenText = token.trim().split(/\s+/);
+    return tokenText[tokenText.length-1];
+
 }

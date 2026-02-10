@@ -1,5 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { UnauthorizedError } from "../api/errors.js";
+import { randomBytes } from "node:crypto";
 
 export function makeJWT(userID: string, expiresIn: number, secret: string): string {
     type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
@@ -18,6 +19,11 @@ export function validateJWT(tokenString: string, secret: string): string {
         const payload = jwt.verify(tokenString, secret);
         return <string>payload.sub;
     } catch (err) {
-        throw new UnauthorizedError("invalid token");
+        throw new UnauthorizedError("Unauthorized");
     }
+}
+
+
+export function makeRefreshToken() {
+    return randomBytes(256).toString('hex');
 }
